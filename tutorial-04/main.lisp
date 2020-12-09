@@ -1,4 +1,4 @@
-;;;; Tutorial 04 - Scrolling and the Matrix Stack
+;;;; Tutorial 04: Scrolling and the Matrix Stack
 
 (defpackage #:tutorial-04
   (:use #:cl #:iterate)
@@ -81,7 +81,7 @@
   (gl:push-matrix))
 
 
-(defun main (&aux (title "Tutorial 04 - Scrolling and the Matrix Stack"))
+(defun main (&aux (title "Tutorial 04: Scrolling and the Matrix Stack"))
   (bt:make-thread
    (lambda ()
      (sdl:with-init ()

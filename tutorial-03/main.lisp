@@ -1,4 +1,4 @@
-;;;; Tutorial - The Viewport
+;;;; Tutorial 03: The Viewport
 
 (defpackage #:tutorial-03
   (:use #:cl #:iterate)
@@ -91,7 +91,7 @@
 	     (:radar :full))))))
 
 
-(defun main (&aux (title "Tutorial 03 - The Viewport"))
+(defun main (&aux (title "Tutorial 03: The Viewport"))
   (bt:make-thread
    (lambda ()
      (sdl:with-init ()

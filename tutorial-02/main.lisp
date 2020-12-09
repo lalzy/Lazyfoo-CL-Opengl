@@ -1,4 +1,4 @@
-;;;; Tutorial 02 - Matrices and Coloring Polygons
+;;;; Tutorial 02: Matrices and Coloring Polygons
 
 (defpackage #:tutorial-02
   (:use #:cl #:iterate)
@@ -74,7 +74,7 @@
   (gl:load-identity)
   (gl:ortho 0 (* *width* *projection-scale*) (* *height* *projection-scale*) 0 1 -1))
 
-(defun main (&aux (title "Tutorial 02 - Matrices and Coloring Polygons"))
+(defun main (&aux (title "Tutorial 02: Matrices and Coloring Polygons"))
   (bt:make-thread
    (lambda ()
      (sdl:with-init ()

@@ -1,22 +1,20 @@
-;;;; Tutorial 07: Clipping Textures
+;;;; Tutorial 09: Updating Textures
 
-(defpackage #:tutorial-07
-  (:nicknames #:lesson-07 #:lazy-foo-07)
+(defpackage #:tutorial-09
   (:use #:cl #:iterate)
   (:export :main))
 
-(in-package #:tutorial-07)
+(in-package #:tutorial-09)
 
 (defparameter *fps* 60)
 (defparameter *Width* 640)
 (defparameter *height* 480)
 
+(defparameter *pixels* nil)
 (defparameter *texture-id* 0)
 (defparameter *texture-width* 0)
 (defparameter *texture-height* 0)
 
-
-(defparameter *arrow-clips* (make-array 4))
 
 (defstruct rect
   (x 0)
@@ -24,7 +22,36 @@
   (w 0)
   (h 0))
 
+(defun lock (&aux (channels 4))
+  (when (and (not *pixels*) (not (= *texture-id* 0)))
+    (setf *pixels* (cffi:foreign-alloc '%gl:ubyte
+				       :count (* *texture-width* *texture-height* channels)))
+    
+    (loop for i from 0 below (* *texture-width* *texture-height* channels) do
+      (setf (cffi:mem-aref *pixels* '%gl:ubyte i) #x00))
+    
+    (gl:bind-texture :texture-2D *texture-id*)
+
+    (%gl:get-tex-image :texture-2d 0 :rgba :unsigned-byte *pixels*)
+
+    (gl:bind-texture :texture-2d 0)))
+
+(defun unlock ()
+  (when (and *pixels* (not (= *texture-id* 0)))
+    (gl:bind-texture :texture-2D *texture-id*)
+
+    (%gl:tex-sub-image-2D :texture-2D 0 0 0 *texture-width* *texture-height* :rgba :unsigned-byte *pixels*)
+
+    (cffi:foreign-free *pixels*)
+    (setf *pixels* nil)
+    
+    (gl:bind-texture :texture-2D 0)))
+
 (defun free-texture ()
+  (when *pixels*
+    (cffi:foreign-free *pixels*)
+    (setf *pixels* nil))
+  
   (unless (= *texture-id* 0)
     (gl:delete-texture *texture-id*)
     (setf *texture-id* 0
@@ -37,7 +64,7 @@
   (setf *texture-id* (gl:gen-texture)
 	*texture-width* width
 	*texture-height* height)
-
+  
   (gl:bind-texture :texture-2d *texture-id*)
   (gl:tex-image-2d :texture-2d 0 target width height 0 target :unsigned-byte pixels)
   (gl:tex-parameter :texture-2d :texture-mag-filter :linear)
@@ -68,11 +95,11 @@
 	      tex-right (/ (+ (rect-x rect) (rect-w rect)) *texture-width*)
 	      tex-top (/ (rect-y rect) *texture-height*)
 	      tex-bottom (/ (+ (rect-y rect) (rect-h rect)) *texture-height*)
-	      quad-width (rect-w rect)
+	      quad-width  (rect-w rect)
 	      quad-height (rect-h rect)))
 
-      
       (gl:translate x y 0)
+      (gl:rotate 0 0. 0. 1.)
 
       (gl:bind-texture :texture-2d *texture-id*)
 
@@ -102,12 +129,10 @@
 (defun render ( )
   (gl:clear :color-buffer-bit)
 
-  (texture-render 0. 0. (aref *arrow-clips* 0))
-  (texture-render (- *width* (rect-w (aref *arrow-clips* 1)))
-		  0. (aref *arrow-clips* 1))
-  (texture-render 0. (- *height* (rect-h (aref *arrow-clips* 2))) (aref *arrow-clips* 2))
-  (texture-render (- *width* (rect-w (aref *arrow-clips* 3))) (- *height* (rect-h (aref *arrow-clips* 3))) (aref *arrow-clips* 3))
-  
+  (let ((x (round (- *width* *texture-width*) 2))
+	(y (round (- *height* *texture-height*) 2)))
+    (texture-render x y))
+ 
   (sdl:update-display))
 
 (defun set-rect (rect x y w h)
@@ -116,21 +141,59 @@
 	(rect-w rect) w
 	(rect-h rect) h))
 
-(defun load-media (path)
-  (setf (aref *arrow-clips* 0) (make-rect :x 0.   :y 0.   :w 128. :h 128.)
-	(aref *arrow-clips* 1) (make-rect :x 128. :Y  0.  :w 128. :h 128.)
-	(aref *arrow-clips* 2) (make-rect :x 0.   :y 128. :w 128. :h 128.)
-	(aref *arrow-clips* 3) (make-rect :x 0.   :y 128. :w 128. :h 128.)
-	)
-  
-  (load-texture-from-file path))
-
-
 (defun handle-keys (key &optional x y))
 
+(defun get-channels-from-format (format)
+  (case format
+    (:RGB 3)
+    (:RGBA 4)))
 
-(defun main (&aux (title "Tutorial 07: Clipping Textures")
-	       (path (concatenate 'string (namestring (asdf:system-relative-pathname :opengl-tutorials "tutorial-07/assets/")) "arrows.png")))
+(defun get-pixel (x y &optional (format :RGBA))
+  (let* ((color-channels (get-channels-from-format format))
+	 (row (* y (* *texture-width* color-channels)))
+	(col (* x color-channels))
+	(mempos (+ row col)))
+    (loop :for i :below color-channels :collect
+			  (cffi:mem-aref *pixels* '%gl:ubyte (+ mempos i)))))
+
+(defun set-pixel (x y pixel &optional (format :RGBA))
+  (let* ((color-channels (get-channels-from-format format))
+	 (row (* y (* *texture-width* color-channels)))
+	(col (* x color-channels))
+	(mempos (+ row col)))
+    (loop :for i :below color-channels
+	  :do
+	     (setf (cffi:mem-aref *pixels* '%gl:ubyte (+ mempos i)) (aref pixel i)))))
+
+
+
+(defun load-media (path)
+  (load-texture-from-file path)
+  (lock)
+
+  ;; Black out cyan
+  (loop :for x :below *texture-width* :do
+    (loop :for y :below *texture-height* :do
+      (let ((pixel (get-pixel x y)))
+	(when (and (= (elt pixel 0) #x0)
+		   (= (elt pixel 1) #xFF)
+		   (= (elt pixel 2) #xFF)
+		   (= (elt pixel 3) #xFF))
+	  (set-pixel x y #(#x0 #x0 #x0 #x0))))))
+
+
+  ;;Diagonal pattern
+  (loop :for y :below *texture-height* :do
+    (loop :for x :below *texture-width* :do
+      (when (/= (mod y 10) (mod x 10))
+	(set-pixel x y #(#x00 #x00 #x00 #x00)))))
+
+  
+  (unlock)
+  )
+
+(defun main (&aux (title "Tutorial 09: Updating Textures")
+	       (path (concatenate 'string (namestring (asdf:system-relative-pathname :opengl-tutorials "tutorial-09/assets/")) "circle.png")))
   (bt:make-thread
    (lambda ()
      (sdl:with-init ()
@@ -143,8 +206,8 @@
 
        (init-gl)
 
+
        (load-media path)
-       
 	 (sdl:with-events ()
 	   (:quit-event () t)
 

@@ -1,4 +1,4 @@
-;;;; Tutorial 05 - Texture Mapping and Pixel Manipilation
+;;;; Tutorial 05: Texture Mapping and Pixel Manipilation
 
 (defpackage #:tutorial-05
   (:use #:cl #:iterate)

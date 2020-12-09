@@ -1,4 +1,4 @@
-;;;; Tutorial 06 - Loading a texture
+;;;; Tutorial 06: Loading a texture
 
 (defpackage #:tutorial-06
   (:use #:cl #:iterate)
@@ -85,7 +85,7 @@
 (defun handle-keys (key &optional x y))
 
 
-(defun main (&aux  (title "Tutorial 06 - Loading a texture")
+(defun main (&aux  (title "Tutorial 06: Loading a texture")
 	       (path (concatenate 'string (namestring (asdf:system-relative-pathname :opengl-tutorials "tutorial-06/assets/")) "texture.png")))
   (bt:make-thread
    (lambda ()

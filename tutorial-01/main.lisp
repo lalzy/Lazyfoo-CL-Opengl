@@ -1,4 +1,4 @@
-;;;; Tutorial 01 - Hello OpenGL
+;;;; Tutorial 01: Hello OpenGL
 
 (defpackage #:tutorial-01
   (:use #:cl #:iterate)
