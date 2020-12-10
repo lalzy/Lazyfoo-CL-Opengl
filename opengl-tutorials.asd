@@ -15,4 +15,5 @@
 	       (:file "tutorial-07/main") ; Clipping Textures
 	       ;; skipping 8 as it's not relevant when using pngload
 	       (:file "tutorial-09/main") ; Updating Textures
+	       (:file "tutorial-10/main") ; Color Keying and Blending
 	       ))
