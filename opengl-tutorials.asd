@@ -17,4 +17,5 @@
 	       (:file "tutorial-09/main") ; Updating Textures
 	       (:file "tutorial-10/main") ; Color Keying and Blending
 	       (:file "tutorial-11/main") ; Stretching and Filters
+	       (:file "tutorial-12/main") ; Rotation
 	       ))
