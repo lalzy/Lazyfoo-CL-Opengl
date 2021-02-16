@@ -20,5 +20,6 @@
 	       (:file "tutorial-12/main") ; Rotation
 	       (:file "tutorial-13/main") ; Matrix Transformations
 	       (:file "tutorial-14/main") ; Repeating Textures
+	       ;; Skipping 15 as it's not relevant to CL-Opengl
 	       (:file "tutorial-16/main") ; Vertex Arrays
 	       ))

@@ -16,12 +16,6 @@
 (defparameter *texture-height* 0)
 
 
-(defstruct rect
-  (x 0)
-  (y 0)
-  (w 0)
-  (h 0))
-
 (defun lock (&aux (channels 4))
   (when (and (not *pixels*) (not (= *texture-id* 0)))
     (setf *pixels* (cffi:foreign-alloc '%gl:ubyte
@@ -78,7 +72,7 @@
     (load-texture-from-pixels (pngload:data image) (pngload:width image) (pngload:height image)
 			      (if (string-equal (pngload:color-type image) :truecolour-alpha) :rgba :rgb))))
 
-(defun texture-render (x y &optional rect) 
+(defun texture-render (x y) 
   (unless (= *texture-id* 0)
     (gl:load-identity)
     
@@ -90,17 +84,9 @@
 	  (quad-width *texture-width*)
 	  (quad-height *texture-height*))
       
-      (when rect
-	(setf tex-left (/ (rect-x rect) *texture-width*)
-	      tex-right (/ (+ (rect-x rect) (rect-w rect)) *texture-width*)
-	      tex-top (/ (rect-y rect) *texture-height*)
-	      tex-bottom (/ (+ (rect-y rect) (rect-h rect)) *texture-height*)
-	      quad-width  (rect-w rect)
-	      quad-height (rect-h rect)))
 
       (gl:translate x y 0)
-      (gl:rotate 0 0. 0. 1.)
-
+      
       (gl:bind-texture :texture-2d *texture-id*)
 
       (gl:with-primitive :quads
@@ -134,12 +120,6 @@
     (texture-render x y))
  
   (sdl:update-display))
-
-(defun set-rect (rect x y w h)
-  (setf (rect-x rect) x
-	(rect-y rect) y
-	(rect-w rect) w
-	(rect-h rect) h))
 
 (defun handle-keys (key &optional x y))
 

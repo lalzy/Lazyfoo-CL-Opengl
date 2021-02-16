@@ -15,14 +15,7 @@
 (defparameter *texture-width* 0)
 (defparameter *texture-height* 0)
 
-
 (defparameter *arrow-clips* (make-array 4))
-
-(defstruct rect
-  (x 0)
-  (y 0)
-  (w 0)
-  (h 0))
 
 (defun free-texture ()
   (unless (= *texture-id* 0)
@@ -110,11 +103,6 @@
   
   (sdl:update-display))
 
-(defun set-rect (rect x y w h)
-  (setf (rect-x rect) x
-	(rect-y rect) y
-	(rect-w rect) w
-	(rect-h rect) h))
 
 (defun load-media (path)
   (setf (aref *arrow-clips* 0) (make-rect :x 0.   :y 0.   :w 128. :h 128.)
