@@ -18,4 +18,7 @@
 	       (:file "tutorial-10/main") ; Color Keying and Blending
 	       (:file "tutorial-11/main") ; Stretching and Filters
 	       (:file "tutorial-12/main") ; Rotation
+	       (:file "tutorial-13/main") ; Matrix Transformations
+	       (:file "tutorial-14/main") ; Repeating Textures
+	       (:file "tutorial-16/main") ; Vertex Arrays
 	       ))
