@@ -12,17 +12,6 @@
 
 (defparameter *gl-verticies* nil) ; Foreign pointer
 
-
-(defparameter *verticies-data* (make-array 8 :initial-contents
-					   (list (* *width* (float (/ 1 4)))
-						 (* *height* (float (/ 1 4)))
-						 (* *width* (float (/ 3 4)))
-						 (* *height* (float (/ 1 4)))
-						 (* *width* (float (/ 3 4)))
-						 (* *height* (float (/ 3 4)))
-						 (* *width* (float (/ 1 4)))
-						 (* *height* (float (/ 3 4))))))
-
 (defun init-gl ()
   (gl:viewport 0. 0. *width* *height*)
 
@@ -53,14 +42,6 @@
 
   (gl:enable-client-state :VERTEX-ARRAY)
 
-  ;; Allocate a foreign pointer to keep the verticies cordinates, which we'll pass to the vertex-pointer
-  (setf *gl-verticies* 
-	(cffi:foreign-alloc :float :count 8))
-
-  ;; Fill the verticies cordinate data into the array pointer.
-  (loop :for i :below 8 :do
-    (setf (cffi:mem-aref *gl-verticies* :float i) (aref *verticies-data* i)))
-  
   (%gl:vertex-pointer 2 :float 0 *gl-verticies*)
   (gl:draw-arrays :quads 0 4)
   
@@ -72,7 +53,15 @@
 (defun handle-keys (key &optional x y))
 
 (defun load-media (&optional path)
-  ;; We're defining the verticies cordinates in the global variable instead
+  (setf *gl-verticies* 
+	(cffi:foreign-alloc :float :initial-contents (list (* *width* (float (/ 1 4)))
+							   (* *height* (float (/ 1 4)))
+							   (* *width* (float (/ 3 4)))
+							   (* *height* (float (/ 1 4)))
+							   (* *width* (float (/ 3 4)))
+							   (* *height* (float (/ 3 4)))
+							   (* *width* (float (/ 1 4)))
+							   (* *height* (float (/ 3 4))))))
   
   ;;(load-texture-from-file path)
   )
