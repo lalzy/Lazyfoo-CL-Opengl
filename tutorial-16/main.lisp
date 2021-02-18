@@ -10,7 +10,14 @@
 (defparameter *Width* 640)
 (defparameter *height* 480)
 
-(defparameter *gl-verticies* nil) ; Foreign pointer
+
+(cffi:defcstruct VertexPos2D
+  (x :float)
+  (y :float))
+
+
+(defparameter *quad-verticies* nil)
+
 
 (defun init-gl ()
   (gl:viewport 0. 0. *width* *height*)
@@ -38,11 +45,10 @@
 
 (defun render ( )
   (gl:clear :color-buffer-bit)
-  ;(texture-render 0 0)
 
   (gl:enable-client-state :VERTEX-ARRAY)
 
-  (%gl:vertex-pointer 2 :float 0 *gl-verticies*)
+  (%gl:vertex-pointer 2 :float 0 *quad-verticies*)
   (gl:draw-arrays :quads 0 4)
   
   (gl:disable-client-state :vertex-array)
@@ -52,19 +58,23 @@
 
 (defun handle-keys (key &optional x y))
 
+(defun set-slot (array-pointer index struct-name slot value)
+  (setf (cffi:foreign-slot-value (cffi:mem-aptr array-pointer `(:struct ,struct-name) index) `(:struct ,struct-name) slot) value))
+
 (defun load-media (&optional path)
-  (setf *gl-verticies* 
-	(cffi:foreign-alloc :float :initial-contents (list (* *width* (float (/ 1 4)))
-							   (* *height* (float (/ 1 4)))
-							   (* *width* (float (/ 3 4)))
-							   (* *height* (float (/ 1 4)))
-							   (* *width* (float (/ 3 4)))
-							   (* *height* (float (/ 3 4)))
-							   (* *width* (float (/ 1 4)))
-							   (* *height* (float (/ 3 4))))))
+  (setf *quad-verticies* (cffi:foreign-alloc '(:STRUCT VertexPos2D) :count 4))
+
+  (set-slot *quad-verticies* 0 'vertexpos2D 'x (* *width* (float (/ 1 4))))
+  (set-slot *quad-verticies* 0 'vertexpos2D 'y (* *height* (float (/ 1 4))))
+
+  (set-slot *quad-verticies* 1 'vertexpos2D 'x (* *width* (float (/ 3 4))))
+  (set-slot *quad-verticies* 1 'vertexpos2D 'y (* *height* (float (/ 1 4))))
+
+  (set-slot *quad-verticies* 2 'vertexpos2D 'x (* *width* (float (/ 3 4))))
+  (set-slot *quad-verticies* 2 'vertexpos2D 'y (* *height* (float (/ 3 4))))
   
-  ;;(load-texture-from-file path)
-  )
+  (set-slot *quad-verticies* 3 'vertexpos2D 'x (* *width* (float (/ 1 4))))
+  (set-slot *quad-verticies* 3 'vertexpos2D 'y (* *height* (float (/ 3 4)))))
 
 (defun main (&aux (title "Tutorial 16: Vertex Arrays"))
   (bt:make-thread
@@ -91,7 +101,7 @@
 		  (update)
 		  (render)))
        
-       (cffi:foreign-free *gl-verticies*)))
+       (cffi:foreign-free *quad-verticies*)))
      :name title))
 
 
