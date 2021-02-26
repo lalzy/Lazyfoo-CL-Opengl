@@ -22,4 +22,7 @@
 	       (:file "tutorial-14/main") ; Repeating Textures
 	       ;; Skipping 15 as it's not relevant to CL-Opengl
 	       (:file "tutorial-16/main") ; Vertex Arrays
+	       (:file "tutorial-17/main") ; Vertex Buffer Objects
+	       (:file "tutorial-18/main") ; Textured Vertex Buffers
+	       (:file "tutorial-19/main") ; Sprite Sheets
 	       ))
